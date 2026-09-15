@@ -1,0 +1,269 @@
+// ShramSetu — data model
+// NOTE: deliberately avoids Prisma enums and scalar lists so the schema is
+// portable between sqlite (local dev) and postgresql (deploy) with a one-line
+// provider change. Union types live in src/lib/types.ts instead.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- workers
+
+model Worker {
+  id              String   @id @default(cuid())
+  uan             String   @unique // eShram Universal Account Number (12 digit)
+  name            String
+  nameLocal       String?
+  phone           String   @unique
+  isSmartphone    Boolean  @default(true) // false => IVR/SMS only worker
+  language        String   @default("hi")
+  gender          String
+  yearOfBirth     Int
+  skillCategory   String // mason, painter, loader, farmhand, ...
+  sector          String // construction, agriculture, textile, ...
+
+  // origin, as recorded at eShram registration
+  homeState       String
+  homeDistrict    String
+
+  // denormalised current presence, derived from latest verified check-in.
+  // District granularity only — precise coordinates are never persisted here.
+  currentState    String
+  currentDistrict String
+  lastSeenAt      DateTime
+
+  // per-purpose consent, revocable by the worker at any time
+  consentWelfare  Boolean  @default(true)
+  consentCrisis   Boolean  @default(true)
+  consentHistory  Boolean  @default(true)
+  consentResearch Boolean  @default(false)
+
+  registeredAt    DateTime @default(now())
+
+  checkIns        CheckIn[]
+  migrations      MigrationEvent[]
+  workRecords     WorkRecord[]
+  consentEvents   ConsentEvent[]
+  sosRequests     SosRequest[]
+  alerts          Alert[]
+  auditEntries    AuditLog[]
+
+  @@index([currentState, currentDistrict])
+  @@index([homeState, homeDistrict])
+  @@index([lastSeenAt])
+  @@index([sector])
+}
+
+model ConsentEvent {
+  id        String   @id @default(cuid())
+  workerId  String
+  worker    Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  purpose   String // welfare | crisis | history | research
+  granted   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([workerId, createdAt])
+}
+
+// ---------------------------------------------------------------- employers
+
+model Employer {
+  id        String   @id @default(cuid())
+  name      String
+  type      String // contractor | factory | farm | msme
+  regNo     String   @unique // Shram Suvidha LIN / GSTIN
+  verified  Boolean  @default(false)
+  state     String
+  district  String
+  createdAt DateTime @default(now())
+
+  worksites Worksite[]
+  records   WorkRecord[]
+}
+
+model Worksite {
+  id             String   @id @default(cuid())
+  employerId     String
+  employer       Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  name           String
+  sector         String
+  state          String
+  district       String
+  lat            Float
+  lng            Float
+  geofenceRadius Int      @default(300) // metres
+  qrSecret       String   @unique // rotated; encoded into the worksite QR
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  checkIns       CheckIn[]
+  records        WorkRecord[]
+
+  @@index([state, district])
+}
+
+// ---------------------------------------------------------------- presence
+
+// A single consented presence attestation. This is the atom of the system.
+model CheckIn {
+  id          String    @id @default(cuid())
+  workerId    String
+  worker      Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  worksiteId  String?
+  worksite    Worksite? @relation(fields: [worksiteId], references: [id])
+
+  method      String // qr | geo | ivr | employer
+  state       String
+  district    String
+
+  // Precise coordinates are retained only while the attestation is being
+  // verified, then nulled by the coarsening job. See lib/privacy.ts.
+  lat         Float?
+  lng         Float?
+  coarsened   Boolean   @default(false)
+
+  // offline-first: when the device recorded it vs when the server received it
+  recordedAt  DateTime
+  syncedAt    DateTime  @default(now())
+  wasOffline  Boolean   @default(false)
+
+  verified    Boolean   @default(true)
+
+  @@index([district, recordedAt])
+  @@index([workerId, recordedAt])
+  @@index([state, recordedAt])
+}
+
+// Emitted when a check-in lands in a district different from currentDistrict.
+// Powers all corridor analytics.
+model MigrationEvent {
+  id           String   @id @default(cuid())
+  workerId     String
+  worker       Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  fromState    String
+  fromDistrict String
+  toState      String
+  toDistrict   String
+  sector       String
+  detectedAt   DateTime
+
+  @@index([toState, detectedAt])
+  @@index([fromState, toState])
+  @@index([detectedAt])
+}
+
+// Verifiable employment credential, accreted from attested check-ins.
+model WorkRecord {
+  id         String   @id @default(cuid())
+  workerId   String
+  worker     Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  employerId String
+  employer   Employer @relation(fields: [employerId], references: [id])
+  worksiteId String
+  worksite   Worksite @relation(fields: [worksiteId], references: [id])
+  sector     String
+  state      String
+  district   String
+  startDate  DateTime
+  endDate    DateTime?
+  daysWorked Int      @default(0)
+  // sha256 over the attestation set — lets a third party verify without
+  // access to the underlying check-ins
+  proofHash  String
+
+  @@index([workerId, startDate])
+}
+
+// ---------------------------------------------------------------- officials
+
+model Officer {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  role          String // district | state | national
+  scopeState    String?
+  scopeDistrict String?
+  createdAt     DateTime @default(now())
+
+  auditEntries  AuditLog[]
+  crisesDeclared CrisisEvent[]
+}
+
+// Every official read of individual-level data is written here, immutably,
+// and is visible to the worker on their privacy screen.
+model AuditLog {
+  id             String   @id @default(cuid())
+  officerId      String
+  officer        Officer  @relation(fields: [officerId], references: [id])
+  action         String // view_individual | export_aggregate | crisis_broadcast | sos_respond
+  targetWorkerId String?
+  targetWorker   Worker?  @relation(fields: [targetWorkerId], references: [id])
+  targetDistrict String?
+  // why the identity veil was lifted — required for individual-level access
+  legalBasis     String // sos_response | declared_crisis | worker_consent | grievance
+  justification  String
+  createdAt      DateTime @default(now())
+
+  @@index([targetWorkerId, createdAt])
+  @@index([officerId, createdAt])
+}
+
+// ---------------------------------------------------------------- crisis
+
+model CrisisEvent {
+  id           String    @id @default(cuid())
+  type         String // flood | heatwave | cyclone | pandemic | industrial
+  title        String
+  state        String
+  district     String
+  severity     String // low | moderate | severe
+  declaredById String
+  declaredBy   Officer   @relation(fields: [declaredById], references: [id])
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  active       Boolean   @default(true)
+
+  alerts       Alert[]
+
+  @@index([state, district, active])
+}
+
+model Alert {
+  id        String       @id @default(cuid())
+  crisisId  String?
+  crisis    CrisisEvent? @relation(fields: [crisisId], references: [id], onDelete: Cascade)
+  workerId  String
+  worker    Worker       @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  kind      String // crisis | welfare | scheme | wage
+  channel   String // push | sms | ivr
+  title     String
+  body      String
+  language  String       @default("hi")
+  sentAt    DateTime     @default(now())
+  readAt    DateTime?
+
+  @@index([workerId, sentAt])
+}
+
+model SosRequest {
+  id         String    @id @default(cuid())
+  workerId   String
+  worker     Worker    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  type       String // wage_theft | accident | unsafe_site | stranded | medical
+  state      String
+  district   String
+  lat        Float?
+  lng        Float?
+  note       String?
+  status     String    @default("open") // open | acknowledged | resolved
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([state, district])
+}

@@ -1,26 +1,141 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   ShramSetu design tokens
+
+   The visual language is the muster roll — the hand-ruled attendance register
+   a labour contractor keeps at a worksite. That register is the analog
+   ancestor of a presence attestation, so the interface is built from its
+   devices: hairline rules, dotted leaders, aligned columns, tabular figures.
+
+   Colour is anchored to the eShram card, which workers know as the peela
+   card — the yellow card. Ochre is the identity colour because it is the
+   object already in their pocket.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* surfaces — cool ledger paper, not warm cream */
+  --color-paper: #f2f4f0;
+  --color-paper-raised: #f9faf7;
+  --color-ledger: #e7ebe4;
+  --color-rule: #c8cfc4;
+  --color-rule-soft: #dde2d9;
+
+  /* ink */
+  --color-ink: #1c1a17;
+  --color-ink-muted: #5a5850;
+  --color-ink-faint: #86857c;
+
+  /* the eShram card */
+  --color-ochre: #d98a1f;
+  --color-ochre-deep: #a4630c;
+  --color-ochre-wash: #f7e9cf;
+
+  /* administrative navy — officer surfaces */
+  --color-indigo: #23395b;
+  --color-indigo-deep: #16243a;
+  --color-indigo-wash: #dde3ec;
+
+  /* states */
+  --color-alert: #a8322d;
+  --color-alert-wash: #f6e0de;
+  --color-verified: #2f6b4f;
+  --color-verified-wash: #dfeae3;
+  --color-withheld: #6b6a80;
+
+  /* type */
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-deva: var(--font-plex-deva), var(--font-plex), sans-serif;
+  --font-odia: var(--font-noto-odia), sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* scale — major third, 1.25 */
+  --text-2xs: 0.694rem;
+  --text-xs: 0.8rem;
+  --text-sm: 0.9rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.563rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-4xl: 3.052rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* --------------------------------------------------------------- base */
+
+* {
+  border-color: var(--color-rule-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv05" 1, "ss01" 1;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Numbers live in tables and must align. Tabular figures everywhere a
+   quantity appears — this is a ledger. Labels stay in the sans face. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Script-specific faces. The worker's language is not a fallback. */
+:lang(hi), :lang(mr), :lang(ne) { font-family: var(--font-deva); }
+:lang(or) { font-family: var(--font-odia); }
+
+/* --------------------------------------------------- ledger devices */
+
+/* Dotted leader, as used in a printed index or a form. Connects a label to
+   its value across whitespace, so the eye tracks the row. */
+.leader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+}
+.leader > :first-child { flex: none; }
+.leader::after {
+  content: "";
+  order: 1;
+  flex: 1 1 auto;
+  height: 0;
+  margin-bottom: 0.28em;
+  border-bottom: 1px dotted var(--color-rule);
+}
+.leader > :last-child { order: 2; flex: none; }
+
+/* Hairline rule with the weight of a ruled register */
+.rule { border-bottom: 1px solid var(--color-rule); }
+
+/* --------------------------------------------------------- a11y floor */
+
+:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The single orchestrated moment on the landing page: the record line
+   resolving into the real one. Not applied anywhere else. */
+@keyframes reveal-row {
+  from { opacity: 0; transform: translateY(0.4rem); }
+  to { opacity: 1; transform: none; }
+}
+.reveal { animation: reveal-row 480ms cubic-bezier(0.22, 0.61, 0.36, 1) both; }

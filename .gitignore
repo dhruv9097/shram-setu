@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+!.env.example
+
+# local sqlite database (regenerate with: npm run db:reset && npm run seed)
+prisma/*.db
+prisma/*.db-journal

@@ -6,22 +6,48 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force",
+    "db:sqlite": "sed -i '' 's/provider = \"postgresql\"/provider = \"sqlite\"/' prisma/schema.prisma && prisma generate",
+    "db:pg": "sed -i '' 's/provider = \"sqlite\"/provider = \"postgresql\"/' prisma/schema.prisma && prisma generate",
+    "test:privacy": "tsx src/lib/__tests__/privacy.test.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "clsx": "^2.1.1",
+    "d3-geo": "^3.1.1",
+    "date-fns": "^4.4.0",
+    "idb-keyval": "^6.3.0",
+    "jose": "^6.2.12",
+    "lucide-react": "^1.46.0",
     "next": "16.3.5",
+    "prisma": "^6.19.3",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.7.0",
+    "topojson-client": "^3.1.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/d3-geo": "^3.1.1",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/topojson-client": "^3.1.5",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "puppeteer-core": "^25.11.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
