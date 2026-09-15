@@ -1,0 +1,15 @@
+{
+  "name": "ShramSetu",
+  "short_name": "ShramSetu",
+  "description": "Mark your presence, carry your work record, control who sees it.",
+  "start_url": "/w/home",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f4f0",
+  "theme_color": "#d98a1f",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

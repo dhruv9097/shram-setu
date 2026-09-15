@@ -58,6 +58,16 @@ export type Cell<T> = T & { count: number };
 
 export type KAnonResult<T> = {
   visible: Cell<T>[];
+  /**
+   * Identities of the withheld cells, carrying no counts.
+   *
+   * A map that rendered a withheld district identically to an empty one would
+   * be hiding the fact that anything was withheld at all, which is the worse
+   * failure. Publishing the identity discloses only "between 1 and k-1 workers
+   * are here" — a range, never a number — which is what statistical agencies
+   * do with suppressed cells.
+   */
+  suppressed: T[];
   /** how many cells were withheld */
   suppressedCells: number;
   /** combined count of withheld cells, safe to publish as one lump */
@@ -90,6 +100,7 @@ export function kAnonymise<T>(cells: Cell<T>[], k = K_THRESHOLD): KAnonResult<T>
 
   return {
     visible: visible.sort((a, b) => b.count - a.count),
+    suppressed: suppressed.map(({ count: _count, ...rest }) => rest as unknown as T),
     suppressedCells: suppressed.length,
     suppressedTotal: suppressed.reduce((s, c) => s + c.count, 0),
     k,

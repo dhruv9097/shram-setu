@@ -1,3 +1,5 @@
+import { RegisterSW } from "@/components/RegisterSW";
+
 /**
  * Worker shell.
  *
@@ -9,6 +11,7 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-dvh bg-ledger">
       <div className="mx-auto min-h-dvh max-w-[26rem] bg-paper shadow-[0_0_0_1px_var(--color-rule)]">
+        <RegisterSW />
         {children}
       </div>
     </div>

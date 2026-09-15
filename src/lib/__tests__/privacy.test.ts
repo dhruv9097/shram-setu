@@ -108,5 +108,25 @@ group("differential privacy on research exports");
   ok(samples.every((s) => s >= 0), "noised counts never go negative");
 }
 
+
+group("withheld cells disclose identity but never value");
+{
+  const r = kAnonymise([
+    { state: "Gujarat", district: "Surat", count: 415 },
+    { state: "Kerala", district: "Idukki", count: 4 },
+    { state: "Assam", district: "Hailakandi", count: 6 },
+  ]);
+  ok(r.suppressed.length === 2, "withheld cells are returned so a map can mark them");
+  ok(
+    r.suppressed.every((c) => !("count" in (c as object))),
+    "no count survives on a withheld cell",
+  );
+  ok(
+    JSON.stringify(r.suppressed).includes("Idukki"),
+    "the district is named, so suppression is visible rather than silent",
+  );
+  ok(!JSON.stringify(r.suppressed).includes("4"), "its value is not recoverable from the payload");
+}
+
 console.log(failures === 0 ? "\nAll privacy guarantees hold.\n" : `\n${failures} FAILURE(S)\n`);
 process.exit(failures ? 1 : 0);
