@@ -1,7 +1,7 @@
 /** End-to-end check of the presence flow, including the offline queue. */
 import puppeteer from "puppeteer-core";
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const BASE = "http://localhost:3001";
+const BASE = "http://localhost:3100";
 
 let fails = 0;
 const ok = (c, m) => { console.log(`${c ? "  PASS  " : "  FAIL  "}${m}`); if (!c) fails++; };

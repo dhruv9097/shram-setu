@@ -3,7 +3,7 @@ const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const b = await puppeteer.launch({ executablePath: CHROME, headless: "new", args: ["--no-sandbox","--hide-scrollbars"] });
 const p = await b.newPage();
 await p.setViewport({ width: 1320, height: 1200, deviceScaleFactor: 2 });
-await p.goto("http://localhost:3001/dashboard", { waitUntil: "networkidle0" });
+await p.goto("http://localhost:3100/dashboard", { waitUntil: "networkidle0" });
 await new Promise(r => setTimeout(r, 1500));
 await p.evaluate(() => document.querySelector('path[data-district="Surat"]').dispatchEvent(new MouseEvent("click",{bubbles:true})));
 await new Promise(r => setTimeout(r, 2500));

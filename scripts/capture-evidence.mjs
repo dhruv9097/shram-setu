@@ -1,7 +1,7 @@
 /** Captures the screenshots used in the submission document. */
 import puppeteer from "puppeteer-core";
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const BASE = "http://localhost:3001";
+const BASE = "http://localhost:3100";
 const OUT = "/tmp/ss";
 
 const browser = await puppeteer.launch({

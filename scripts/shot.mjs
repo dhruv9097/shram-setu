@@ -7,7 +7,7 @@
 import puppeteer from "puppeteer-core";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-const BASE = process.env.BASE ?? "http://localhost:3001";
+const BASE = process.env.BASE ?? "http://localhost:3100";
 
 const [, , path = "/", out = "/tmp/ss/out.png", w = "440", h = "900", ...rest] = process.argv;
 const fullPage = rest.includes("--full");
