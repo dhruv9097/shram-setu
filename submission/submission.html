@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ShramSetu — SIH Problem Statement 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Devanagari:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Oriya:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f2f4f0; --raised:#f9faf7; --rule:#c8cfc4; --rule-soft:#dde2d9;
+    --ink:#1c1a17; --muted:#5a5850; --faint:#86857c;
+    --ochre:#d98a1f; --ochre-deep:#a4630c; --ochre-wash:#f7e9cf;
+    --indigo:#23395b; --indigo-mid:#4a73b0; --indigo-wash:#dde3ec;
+    --alert:#a8322d; --alert-wash:#f6e0de; --withheld:#6b6a80;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"IBM Plex Sans",system-ui,sans-serif;color:var(--ink);background:#888;-webkit-font-smoothing:antialiased}
+  .num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .slide{
+    width:1280px;height:720px;background:var(--paper);
+    padding:40px 52px;display:flex;flex-direction:column;
+    page-break-after:always;break-after:page;position:relative;overflow:hidden;
+  }
+  .slide:last-child{page-break-after:auto;break-after:auto}
+  .top{display:flex;justify-content:space-between;align-items:baseline;
+       border-bottom:1px solid var(--rule);padding-bottom:10px;margin-bottom:26px}
+  .brand{font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .brand span{font-family:"IBM Plex Sans Devanagari";color:var(--muted);margin-left:9px;font-weight:400}
+  .ps{font-size:11px;color:var(--faint)}
+  h1{font-size:47px;line-height:1.05;letter-spacing:-.023em;font-weight:600;max-width:18ch}
+  h2{font-size:29px;line-height:1.13;letter-spacing:-.019em;font-weight:600}
+  h3{font-size:12px;font-weight:600;margin-bottom:7px}
+  p{font-size:16.5px;line-height:1.55;color:var(--muted);max-width:56ch}
+  .lead{font-size:18px;line-height:1.5;color:var(--ink)}
+  .cols{display:grid;gap:34px;flex:1 1 auto;min-height:0}
+  .cols > div{display:flex;flex-direction:column;justify-content:center;min-height:0}
+  .c2{grid-template-columns:1.05fr 1fr}
+  .c2b{grid-template-columns:1fr 1.1fr}
+  .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);
+         border:1px solid var(--rule);margin-top:auto}
+  .strip div{background:var(--raised);padding:13px 16px}
+  .strip b{display:block;font-family:"IBM Plex Mono",monospace;font-size:27px;font-weight:600;line-height:1;letter-spacing:-.02em}
+  .strip small{display:block;font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.35}
+  ul{list-style:none}
+  li{font-size:15.5px;line-height:1.5;color:var(--muted);padding-left:16px;position:relative;margin-bottom:13px}
+  li::before{content:"";position:absolute;left:0;top:.55em;width:6px;height:1.5px;background:var(--ochre-deep)}
+  li b{color:var(--ink);font-weight:600}
+  .barred{border-left:2px solid var(--ochre);padding-left:15px}
+  .barred.ind{border-color:var(--indigo-mid)}
+  .barred.red{border-color:var(--alert)}
+  .chan{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+  .chan div{background:var(--raised);padding:15px}
+  .chan b{font-size:14.5px;display:block;margin-bottom:6px}
+  .chan small{font-size:12.5px;line-height:1.5;color:var(--muted);display:block}
+  .flow{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);
+        background:var(--raised);border:1px solid var(--rule);padding:12px 15px;line-height:1.85}
+  .flow em{font-style:normal;color:var(--ochre-deep);font-weight:600}
+  /* Figures are height-constrained by the grid row, so a tall portrait
+     screenshot scales down instead of pushing the slide past its page. */
+  .cols figure{display:flex;flex-direction:column;min-height:0;align-items:center}
+  .cols figure img{flex:1 1 0;min-height:0;width:auto;max-width:100%;
+                   object-fit:contain;object-position:center top}
+  img{display:block;border:1px solid var(--rule)}
+  .shot{background:var(--raised)}
+  figcaption{font-size:12px;color:var(--faint);margin-top:8px;flex:none;text-align:center}
+  .kpi{display:flex;gap:26px;margin-top:14px}
+  .kpi div b{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;display:block;line-height:1}
+  .kpi div small{font-size:11px;color:var(--muted);display:block;margin-top:5px}
+  .foot{position:absolute;left:52px;right:52px;bottom:18px;display:flex;justify-content:space-between;
+        border-top:1px solid var(--rule-soft);padding-top:9px;font-size:10px;color:var(--faint)}
+  .tag{align-self:flex-start;background:var(--alert-wash);color:var(--alert);font-size:11.5px;
+       font-weight:600;padding:4px 10px;margin-bottom:14px}
+  .tag.ok{background:var(--ochre-wash);color:var(--ochre-deep)}
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide">
+  <div class="top">
+    <div class="brand">ShramSetu<span>श्रम सेतु</span></div>
+    <div class="ps">Problem Statement 1 — Migrant Worker Tracking</div>
+  </div>
+  <div class="cols c2">
+    <div>
+      <h1>eShram knows who India’s workers are. Not where they are.</h1>
+      <p style="margin-top:20px">
+        It records a worker once at enrolment, against a home address. They migrate;
+        the record stays. Welfare goes there and never arrives.
+      </p>
+      <p class="lead barred" style="margin-top:22px">
+        So we did not build tracking. We built presence the worker switches on,
+        because it pays them back.
+      </p>
+    </div>
+    <figure>
+      <img class="shot" src="img/map-presence.png" alt="District map of India showing migrant worker presence">
+      <figcaption>Hatched districts are withheld to protect under ten workers.</figcaption>
+    </figure>
+  </div>
+  <div class="strip">
+    <div><b>31.9 cr</b><small>enrolled on eShram, Aug 2026</small></div>
+    <div><b>66%</b><small>of modelled workers are away from home</small></div>
+    <div><b>18%</b><small>modelled without a smartphone</small></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="top"><div class="brand">ShramSetu</div><div class="ps">The inversion</div></div>
+  <div class="cols c2">
+    <div>
+      <h2>Why a tracking app fails</h2>
+      <ul style="margin-top:18px">
+        <li><b>Low literacy, twenty languages.</b> Text-heavy screens exclude the people they serve.</li>
+        <li><b>One in five has no smartphone.</b></li>
+        <li><b>Worksites have no signal.</b></li>
+        <li><b>No reason to update a database that follows you.</b></li>
+      </ul>
+    </div>
+    <div>
+      <h2>What the worker gets back</h2>
+      <ul style="margin-top:18px">
+        <li><b>Ration that travels</b> with them.</li>
+        <li><b>Proof of employment</b> for a claim or the next job.</li>
+        <li><b>Warnings</b> in the language they read.</li>
+        <li><b>Control.</b> Consent is per purpose, revocable, and every lookup is logged where they can see it.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="top"><div class="brand">ShramSetu</div><div class="ps">How it works</div></div>
+  <h2>Three ways to mark presence</h2>
+  <div class="chan" style="margin-top:20px">
+    <div><b>Scan the worksite code</b><small>Employer shows a QR. Scanning attests presence and builds the muster roll.</small></div>
+    <div><b>One tap, geofenced</b><small>No typing, no reading. Coordinates verify the boundary, then go.</small></div>
+    <div><b>Missed call</b><small>For a feature phone. The tower gives a district.</small></div>
+  </div>
+  <div class="cols c2b" style="margin-top:26px">
+    <div>
+      <p><b style="color:var(--ink)">Offline first.</b> Attestations queue on the device and send
+      themselves when a signal returns. 28% arrived that way.</p>
+      <div class="flow" style="margin-top:18px">
+        worker &nbsp;·&nbsp; employer &nbsp;·&nbsp; officer<br>
+        &darr;<br>
+        attestation API<br>
+        &darr;<br>
+        <em>privacy kernel</em><br>
+        &darr;<br>
+        PostgreSQL
+      </div>
+    </div>
+    <figure>
+      <img class="shot" src="img/worker-offline.png" alt="Worker app showing an attestation saved on the device with no network">
+      <figcaption>The attestation waits on the phone.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="top"><div class="brand">ShramSetu</div><div class="ps">Privacy architecture</div></div>
+  <h2>Officials see flows. Seeing a person needs a reason.</h2>
+  <div class="cols c2" style="margin-top:20px">
+    <div>
+      <ul>
+        <li><b>District granularity.</b> Coordinates verify a worksite boundary, then are discarded after seven days.</li>
+        <li><b>Suppression below ten.</b> A single withheld cell can be recovered by subtraction, so it takes a neighbour with it.</li>
+        <li><b>Gated and logged.</b> Seeing an individual needs a recorded basis, and they can read who looked.</li>
+      </ul>
+    </div>
+    <figure>
+      <img class="shot" src="img/map-corridors.png" alt="Migration corridors between states">
+      <figcaption>Corridors publish freely. Individuals never do.</figcaption>
+    </figure>
+  </div>
+  <div class="strip">
+    <div><b>97%</b><small>hold no coordinates</small></div>
+    <div><b>59</b><small>districts withheld</small></div>
+    <div><b>k = 10</b><small>suppression floor</small></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="top"><div class="brand">ShramSetu</div><div class="ps">The case it is built for</div></div>
+  <span class="tag">Flood declared — Surat</span>
+  <h2>The state needs a headcount and a language list, now.</h2>
+  <div class="cols c2b" style="margin-top:22px">
+    <div>
+      <p class="lead barred red">
+        412 present, every one from another state. 276 need the warning in Odia,
+        not Gujarati. 68 have no smartphone.
+      </p>
+      <p style="margin-top:20px">
+        And 10 withdrew consent, so the system does not contact them — even in a flood.
+        A consent switch that bends in an emergency was never consent.
+      </p>
+    </div>
+    <figure>
+      <img class="shot" src="img/surat-panel.png" alt="Surat district breakdown showing presence, languages and reachability">
+      <figcaption>Live drill-down, under the suppression gate.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="top"><div class="brand">ShramSetu</div><div class="ps">Feasibility</div></div>
+  <span class="tag ok">Working prototype, not a mockup</span>
+  <h2>Built and running today</h2>
+  <div class="cols c2b" style="margin-top:20px">
+    <div>
+      <ul>
+        <li><b>One deployable system.</b> Next.js and PostgreSQL. The worker app installs as a PWA — no app store.</li>
+        <li><b>Real geography.</b> 726 districts, 14 corridors from Census and Economic Survey data.</li>
+        <li><b>Honest boundary.</b> eShram UAN auth sits behind a mocked interface. No Aadhaar data stored.</li>
+        <li><b>Verified, not asserted.</b> Privacy guarantees and the offline queue ship with tests.</li>
+      </ul>
+      <div class="kpi">
+        <div><b>4,608</b><small>workers</small></div>
+        <div><b>145k</b><small>attestations</small></div>
+        <div><b>726</b><small>districts</small></div>
+        <div><b>14</b><small>corridors</small></div>
+      </div>
+    </div>
+    <figure>
+      <img class="shot" src="img/worker-odia.png" alt="Worker app home screen in Odia">
+      <figcaption>One button, the worker’s own language.</figcaption>
+    </figure>
+  </div>
+  <div class="foot">
+    <span>github.com/dhruv9097/shram-setu</span>
+    <span>Synthetic data. No real worker record used.</span>
+  </div>
+</section>
+
+</body>
+</html>

@@ -172,6 +172,8 @@ export function IndiaMap({
             return (
               <path
                 key={p.id}
+                data-district={p.district}
+                data-state={p.state}
                 d={p.d}
                 fill={fill}
                 stroke={isSelected ? "#1c1a17" : "#d5dbd3"}
