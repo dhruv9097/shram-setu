@@ -91,7 +91,7 @@ The aggregate dashboard needs no sign-in, because by construction it is already 
 publish. Identity is required to *act*. The access model is the argument.
 
 ```bash
-npm run test:privacy   # 24 assertions over the guarantees above
+npm run test:privacy   # 22 assertions over the guarantees above
 ```
 
 ---
