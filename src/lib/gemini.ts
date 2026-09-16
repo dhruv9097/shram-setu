@@ -135,3 +135,89 @@ export async function triageGrievance(
     clearTimeout(timer);
   }
 }
+
+// ---------------------------------------------------------------- alerts
+
+/**
+ * Translates a relief message into the languages actually present in a
+ * district. An officer writes once; every worker reads it in their own
+ * language. Machine translation is acceptable here in a way it would not be
+ * for a legal notice: the message is short, operational, and its failure mode
+ * is an awkward sentence rather than a wrong entitlement.
+ *
+ * Returns null if nothing is reachable, and the caller sends English with that
+ * stated plainly rather than pretending the translation happened.
+ */
+export async function translateAlert(
+  title: string,
+  body: string,
+  languages: string[],
+  timeoutMs = 12000,
+): Promise<Record<string, { title: string; body: string }> | null> {
+  const key = process.env.GEMINI_API_KEY;
+  const targets = languages.filter((l) => l !== "en");
+  if (!key || !targets.length) return null;
+
+  const properties = Object.fromEntries(
+    targets.map((l) => [
+      l,
+      {
+        type: "object",
+        properties: { title: { type: "string" }, body: { type: "string" } },
+        required: ["title", "body"],
+      },
+    ]),
+  );
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  const payload = JSON.stringify({
+    systemInstruction: {
+      parts: [
+        {
+          text: `Translate a government relief alert for unorganised migrant workers in India.
+
+Keep it short, plain and calm. Use everyday spoken vocabulary, not administrative register —
+many readers read slowly. Keep place names, phone numbers and timings exactly as given.
+Do not add information that is not in the original.
+
+Language codes: hi Hindi, or Odia, bn Bengali, as Assamese.`,
+        },
+      ],
+    },
+    contents: [{ role: "user", parts: [{ text: `Title: ${title}\nBody: ${body}` }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: { type: "object", properties, required: targets },
+      temperature: 0.2,
+    },
+  });
+
+  try {
+    for (const model of MODELS) {
+      const res = await fetch(`${ENDPOINT(model)}?key=${key}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        signal: controller.signal,
+        body: payload,
+      });
+      if (!res.ok) {
+        if (RETRYABLE.has(res.status)) continue;
+        return null;
+      }
+      const json = await res.json();
+      const raw = json?.candidates?.[0]?.content?.parts
+        ?.map((p: { text?: string }) => p.text)
+        .filter(Boolean)
+        .join("");
+      if (!raw) continue;
+      return JSON.parse(raw) as Record<string, { title: string; body: string }>;
+    }
+    return null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}

@@ -9,6 +9,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { db } from "./db";
+import { OFFICER_ROLES, type OfficerRole } from "./types";
 
 const SECRET = new TextEncoder().encode(
   process.env.SESSION_SECRET ?? "shramsetu-dev-secret-not-for-production",
@@ -81,8 +82,20 @@ export async function endOfficerSession() {
   (await cookies()).delete(OFFICER_COOKIE);
 }
 
+function isOfficerRole(value: string): value is OfficerRole {
+  return (OFFICER_ROLES as readonly string[]).includes(value);
+}
+
+/**
+ * The role column is a plain string so the schema stays portable between
+ * sqlite and postgres, so it is validated here rather than cast. An
+ * unrecognised role is treated as no session at all — scope checks downstream
+ * depend on this value, and guessing would silently widen someone's access.
+ */
 export async function currentOfficer() {
   const id = await read(OFFICER_COOKIE, "officerId");
   if (!id) return null;
-  return db.officer.findUnique({ where: { id } });
+  const officer = await db.officer.findUnique({ where: { id } });
+  if (!officer || !isOfficerRole(officer.role)) return null;
+  return { ...officer, role: officer.role };
 }
