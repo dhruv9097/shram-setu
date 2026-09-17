@@ -64,6 +64,10 @@ export const STRINGS = {
   urgency_immediate: { hi: "तुरंत", or: "ତୁରନ୍ତ", bn: "এখনই", as: "তৎক্ষণাৎ", en: "Immediate" },
   urgency_urgent: { hi: "ज़रूरी", or: "ଜରୁରୀ", bn: "জরুরি", as: "জৰুৰী", en: "Urgent" },
   urgency_routine: { hi: "सामान्य", or: "ସାଧାରଣ", bn: "সাধারণ", as: "সাধাৰণ", en: "Routine" },
+  scanCode: { hi: "साइट का कोड स्कैन करें", or: "ସାଇଟ୍ କୋଡ୍ ସ୍କାନ୍ କରନ୍ତୁ", bn: "সাইটের কোড স্ক্যান করুন", as: "ছাইটৰ ক'ড স্কেন কৰক", en: "Scan the worksite code" },
+  pointAtCode: { hi: "कोड की ओर कैमरा रखें", or: "କୋଡ୍ ଆଡ଼କୁ କ୍ୟାମେରା ଧରନ୍ତୁ", bn: "কোডের দিকে ক্যামেরা ধরুন", as: "ক'ডৰ ফালে কেমেৰা ধৰক", en: "Point the camera at the code" },
+  enterCode: { hi: "या कोड टाइप करें", or: "କିମ୍ବା କୋଡ୍ ଟାଇପ୍ କରନ୍ତୁ", bn: "অথবা কোড টাইপ করুন", as: "বা ক'ড টাইপ কৰক", en: "Or type the code" },
+  cameraBlocked: { hi: "कैमरा नहीं खुला। कोड टाइप करें।", or: "କ୍ୟାମେରା ଖୋଲିଲା ନାହିଁ। କୋଡ୍ ଟାଇପ୍ କରନ୍ତୁ।", bn: "ক্যামেরা খোলেনি। কোড টাইপ করুন।", as: "কেমেৰা নোখোলিল। ক'ড টাইপ কৰক।", en: "The camera did not open. Type the code instead." },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

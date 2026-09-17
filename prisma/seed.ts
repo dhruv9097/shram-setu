@@ -458,10 +458,36 @@ async function main() {
 
   console.log(`  ${workers.length} workers, ${checkIns.length} check-ins`);
 
-  // batched inserts — sqlite chokes on very large single statements
-  async function insertBatched(name: string, rows: any[], fn: (b: any[]) => Promise<unknown>, size = 2000) {
+  // Batched inserts. sqlite chokes on very large single statements, and a
+  // serverless Postgres closes a connection that has been held too long —
+  // P1017 mid-seed is the platform behaving as documented, not a fluke. So
+  // batches stay small over a network and a dropped connection is retried
+  // rather than losing the run.
+  const remote = !(process.env.DATABASE_URL ?? "").startsWith("file:");
+  const BATCH = remote ? 500 : 2000;
+
+  async function insertBatched(
+    name: string,
+    rows: any[],
+    fn: (b: any[]) => Promise<unknown>,
+    size = BATCH,
+  ) {
     for (let i = 0; i < rows.length; i += size) {
-      await fn(rows.slice(i, i + size));
+      const batch = rows.slice(i, i + size);
+      for (let attempt = 1; ; attempt++) {
+        try {
+          await fn(batch);
+          break;
+        } catch (err: any) {
+          const dropped =
+            err?.code === "P1017" || /closed the connection|ECONNRESET|terminating/i.test(String(err?.message));
+          if (!dropped || attempt > 5) throw err;
+          const wait = 400 * attempt;
+          process.stdout.write(`\n  ${name}: connection dropped, retrying in ${wait}ms (${attempt}/5)\n`);
+          await new Promise((r) => setTimeout(r, wait));
+          await prisma.$connect();
+        }
+      }
       process.stdout.write(`\r  ${name}: ${Math.min(i + size, rows.length)}/${rows.length}   `);
     }
     process.stdout.write("\n");

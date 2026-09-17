@@ -121,8 +121,8 @@ model. Those are arithmetic, and they should stay that way.
 
 ```bash
 npm install
-npm run db:reset      # migrate
-npm run seed          # ~30s
+npx prisma db push    # create the schema
+npm run seed          # ~30s on sqlite, ~3 min against a remote Postgres
 npm run dev           # http://localhost:3100
 ```
 
@@ -134,9 +134,17 @@ GEMINI_API_KEY="…"    # grievance triage and alert translation
 
 Without it the app runs fully; triage falls back to the worker's own choice.
 
-**Deploying:** development runs on SQLite for fast reseeds. For a deployment, point
-`DATABASE_URL` at Postgres and run `npm run db:pg`. The schema deliberately avoids Prisma
-enums and scalar lists so the provider swap is a one-line change.
+**Postgres or SQLite.** The schema deliberately avoids Prisma enums and scalar lists, so
+the provider is a one-line swap: `npm run db:pg` or `npm run db:sqlite`, then
+`npx prisma db push`. SQLite is faster to reseed while developing; Postgres is what a
+deployment uses. Both are exercised by the same seed and the same tests.
+
+Two things that cost time when switching, worth knowing:
+- A running dev server keeps the previously generated Prisma client in memory. Restart it
+  after any provider change or migration, or it will silently keep querying the old
+  database.
+- A serverless Postgres closes long-held connections mid-seed (`P1017`). The seed uses
+  smaller batches and retries on a dropped connection when the target is remote.
 
 ### Tests
 
@@ -146,6 +154,7 @@ node scripts/smoke.mjs    # every route renders, no console errors
 node scripts/test-checkin.mjs   # offline queue drains on reconnect
 node scripts/test-sos.mjs       # grievance triage end to end
 node scripts/test-crisis.mjs    # scope and consent enforcement
+node scripts/test-qr.mjs <secret>  # worksite QR check-in
 ```
 
 The browser tests drive the real pages through the Chrome already installed on the

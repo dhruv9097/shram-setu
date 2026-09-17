@@ -87,8 +87,16 @@ export default async function WorkerHome({
           </dl>
 
           <Link
+            href="/w/scan"
+            className="mt-7 flex items-center justify-center gap-3 border-2 border-ink px-4 py-3.5"
+          >
+            <span aria-hidden className="text-xl leading-none">&#9635;</span>
+            <span lang={lang} className="text-base font-semibold">{t("scanCode", lang)}</span>
+          </Link>
+
+          <Link
             href="/w/sos"
-            className="mt-7 flex items-center justify-center border-2 border-alert px-4 py-3.5 text-alert"
+            className="mt-3 flex items-center justify-center border-2 border-alert px-4 py-3.5 text-alert"
           >
             <span lang={lang} className="text-base font-semibold">{t("sos", lang)}</span>
           </Link>
