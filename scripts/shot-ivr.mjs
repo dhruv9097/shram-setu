@@ -1,0 +1,11 @@
+import puppeteer from "puppeteer-core";
+const b = await puppeteer.launch({ executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", headless: "new", args: ["--no-sandbox","--hide-scrollbars"] });
+const p = await b.newPage();
+await p.setViewport({ width: 1100, height: 760, deviceScaleFactor: 2 });
+await p.goto("http://localhost:3100/ivr", { waitUntil: "networkidle0" });
+await new Promise(r => setTimeout(r, 800));
+await p.click('button[aria-label="Call"]');
+await new Promise(r => setTimeout(r, 6000));
+await p.screenshot({ path: "/tmp/ss/ivr.png" });
+console.log("captured");
+await b.close();

@@ -159,7 +159,7 @@ export default async function Home() {
       {/* entry points */}
       <section className="mt-20">
         <h2 className="text-xl font-semibold tracking-tight">Open the system</h2>
-        <div className="mt-6 grid gap-px border border-rule bg-rule sm:grid-cols-3">
+        <div className="mt-6 grid gap-px border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
               href: "/w",
@@ -182,6 +182,13 @@ export default async function Home() {
               sub: "Worksite",
               detail: "Post a worksite code, keep an attested muster roll.",
               note: "For contractors and units",
+            },
+            {
+              href: "/ivr",
+              title: "No smartphone",
+              sub: "Missed call",
+              detail: "How the one in five without a phone marks presence.",
+              note: `${stats.featurePhone.toLocaleString("en-IN")} workers in this system`,
             },
           ].map((card) => (
             <Link
